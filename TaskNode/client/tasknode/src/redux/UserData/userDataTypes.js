@@ -1,2 +1,13 @@
 export const REGISTER_ADMIN = "REGISTER_ADMIN";
 export const FETCH_USER = "FETCH_USER";
+export const FETCH_ADMIN = "FETCH_ADMIN";
+export const FETCH_ALL_USER = "FETCH_ALL_USER";
+export const REGISTER_USER = "SAVE_USER";
+export const UPDATE_STATUS = "UPDATE_STATUS";
+export const DELETE_USER = "UPDATE_STATUS";
+export const UPDATE_USER = "UPDATE_USER";
+export const FORGET_PASSWORD = "FORGET_PASSWORD";
+export const RESET_PASSWORD = "RESET_PASSWORD";
+export const OTP = "OTP";
+export const OTP_VERIFY = "OTP_VERIFY";
+export const LOADING="LOADING";

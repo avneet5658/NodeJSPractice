@@ -59,6 +59,13 @@ export const dob = (age) => {
   return true;
 };
 
+export const isImage = (img) => {
+  if (!img.name.match(/\.(jpg|jpeg|png|gif)$/)) {
+    return false;
+  }
+  return true;
+};
+
 export const verifyAllfields = (formValue) => {
   if (!formValue.name.match(alphabets)) {
     return "Name must contain only alphabets";

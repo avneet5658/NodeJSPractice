@@ -2,15 +2,28 @@ const Admin = require("../model/Admin");
 const User = require("../model/User");
 const jwt = require("jsonwebtoken");
 const fast2sms = require("fast-two-sms");
-var otpGenerator = require("otp-generator");
-
+const multer = require("multer");
+const otpGenerator = require("otp-generator");
 const mailgun = require("mailgun-js");
+const fs = require("fs");
+const uuid = require("uuid");
+const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
 const DOMAIN = "sandbox57949ce6cdec4045a3a2091f2f0d1e0b.mailgun.org";
 const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: DOMAIN });
 
+const fileStorageEngine = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "--" + file.originalname);
+  },
+});
+
+const upload = multer({ storage: fileStorageEngine });
+
 const saveAdmin = (req, res) => {
   const admin = req.body;
-  console.log(admin);
   try {
     Admin.findOne({ email: admin.email }, async (emailerr, emailuser) => {
       if (emailerr || emailuser) {
@@ -50,7 +63,6 @@ const getAdmin = async (req, res) => {
 };
 const getUser = async (req, res) => {
   const userDetails = req.body;
-  console.log(userDetails);
 
   try {
     const user = await User.find({
@@ -59,10 +71,8 @@ const getUser = async (req, res) => {
         { password: userDetails.password },
       ],
     });
-    console.log(user);
     if (user.length !== 0) {
       const status = user[0].status;
-      console.log(status);
       if (status) {
         return res.status(201).json(user);
       }
@@ -77,7 +87,6 @@ const getAllUser = async (req, res) => {
   try {
     const user = await User.find();
     res.status(201).json(user);
-    console.log(user);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
@@ -106,12 +115,10 @@ const saveUser = (req, res) => {
 };
 const updateStatus = async (req, res) => {
   const current = req.body;
-  console.log(current);
   try {
     const updates = await User.findByIdAndUpdate(current.id, {
       $set: { status: current.currentStatus },
     });
-    console.log(updates);
     res.status(201).json(updates);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -146,7 +153,6 @@ const updateUser = async (req, res) => {
 
 const forgetPassword = async (req, res) => {
   const email = req.body.email;
-  console.log(email);
   try {
     User.findOne({ email }, async (err, user) => {
       if (err || !user) {
@@ -181,7 +187,6 @@ const forgetPassword = async (req, res) => {
 };
 const resetPassword = (req, res) => {
   const { token, newPass } = req.body;
-  console.log(token, newPass);
   if (token) {
     jwt.verify(
       token,
@@ -193,7 +198,6 @@ const resetPassword = (req, res) => {
             .json({ message: "Token expired or may be not a valid token" });
         } else {
           const _id = decodedData._id;
-          console.log(_id);
           User.findOne({ _id }, async (err, user) => {
             if (err) {
               return res.json({ error: err.message });
@@ -214,7 +218,6 @@ const resetPassword = (req, res) => {
 
 const forgetLinkOtp = async (req, res) => {
   const { contact } = req.body;
-  console.log(contact);
 
   try {
     User.findOne({ contact }, async (err, user) => {
@@ -226,7 +229,6 @@ const forgetLinkOtp = async (req, res) => {
         upperCase: false,
         specialChars: false,
       });
-      console.log(otp);
       await user.updateOne({ otp }, async (err, body) => {
         if (err) {
           return res.json({ message: err.message });
@@ -270,6 +272,66 @@ const verifyOtp = (req, res) => {
   }
 };
 
+const getUserById = async (req, res) => {
+  const id = req.params.id;
+  await User.findById(id, (err, user) => {
+    if (err) {
+      return res.status(200).json({ message: "User not found" });
+    }
+    return res.status(201).json(user);
+  });
+};
+
+const imageUploader = (req, res) => {
+  const path = fs.readFileSync(req.file.path);
+  const encodeImg = path.toString("base64");
+  const _id = req.body.id;
+  User.findOne({ _id }, (err, user) => {
+    if (err || !user) {
+      return res.status(200).json({ message: "User not find" });
+    }
+    user.updateOne({ image: encodeImg }, async (err, user) => {
+      if (err || !user) {
+        return res.status(200).json({ message: "User not find" });
+      }
+      return await res.status(201).json(user);
+    });
+  });
+};
+
+const paymentHandle = async (req, res) => {
+  const { product, token } = req.body;
+  console.log(product, token);
+  const idempotencyKey = uuid();
+  return stripe.customers
+    .create({
+      email: token.email,
+      source: token.id,
+    })
+    .then((customer) => {
+      stripe.charge.create(
+        {
+          amount: product.price * 100,
+          current: "usd",
+          customer: customer.id,
+          receipt_email: token.email,
+          description: `purchase of ${product.name}`,
+          shipping: {
+            name: token.card.name,
+            address: {
+              country: token.card.address_country,
+            },
+          },
+        },
+        idempotencyKey
+      );
+    })
+    .then((result) => res.status(200).json(result))
+    .catch((err) => {
+      res.status(400).json({ message: err });
+    });
+};
+
 module.exports = {
   saveAdmin,
   getAdmin,
@@ -283,4 +345,8 @@ module.exports = {
   resetPassword,
   forgetLinkOtp,
   verifyOtp,
+  getUserById,
+  imageUploader,
+  upload,
+  paymentHandle,
 };

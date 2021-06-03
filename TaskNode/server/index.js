@@ -11,6 +11,8 @@ app.use(cors());
 const PORT = process.env.PORT || 5000;
 
 app.use("/admin", adminRouter);
+const path = require("path");
+app.use("/images", express.static("/images"));
 
 mongoose
   .connect(process.env.DBConnection, {

@@ -12,6 +12,8 @@ import {
   OTP,
   OTP_VERIFY,
   LOADING,
+  FETCH_USER_BY_ID,
+  IMAGE_UPLOAD,
 } from "./userDataTypes";
 
 const initialState = {
@@ -53,6 +55,10 @@ const userDataReducer = (state = initialState, action) => {
       return { ...state, userData: action.payload };
     case LOADING:
       return { ...state, loading: action.payload };
+    case FETCH_USER_BY_ID:
+      return { ...state, loading: action.payload };
+    case IMAGE_UPLOAD:
+      return { ...state, loadng: action.payload };
     default:
       return state;
   }

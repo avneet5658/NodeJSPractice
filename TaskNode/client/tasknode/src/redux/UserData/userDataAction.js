@@ -105,11 +105,10 @@ export const getOtp = (number) => async (dispatch) => {
   if (otpStatus.data.message) {
     return otpStatus.data.message;
   }
-  return "Internal error"
-    //Successfully Sent
+  return "Internal error";
+  //Successfully Sent
 };
 export const otpVerify = (otp) => async (dispatch) => {
-  console.log("action redux", otp);
   let verification = await api.verifyOtp(otp);
   console.log(verification);
   if (verification.data.message) {
@@ -118,10 +117,28 @@ export const otpVerify = (otp) => async (dispatch) => {
   return "Internal Error";
 };
 export const setLoading = (loadingState) => async (dispatch) => {
-  console.log("loading");
   try {
     await dispatch({ type: LOADING, payload: loadingState });
   } catch (err) {
     console.log("loading error", err);
   }
 };
+
+export const getUserById = (id) => async (dispatch) => {
+  const user = await api.getUserById(id);
+  console.log(user);
+  if (user) {
+    return user.data;
+  }
+};
+
+export const imageupload = (formData) => async (dispatch) => {
+  const uploadStatus = await api.imageupload(formData);
+  console.log(uploadStatus);
+};
+
+export const paymentHandle = (details) =>async(dispatch)=>{
+  console.log("action redux", details);
+  const paymentStatus = await api.handlePayment(details)
+
+}

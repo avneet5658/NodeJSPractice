@@ -30,3 +30,8 @@ export const resetPassword = (token, newPass) =>
 export const getOtp = (contact) => axios.put(`${url}/otp`, { contact });
 
 export const verifyOtp = (otp) => axios.put(`${url}/verifyOtp`, { otp });
+export const getUserById = (id) => axios.get(`${url}/getUserById/${id}`);
+export const imageupload = (formData) =>
+  axios.post(`${url}/getImage`, formData);
+export const handlePayment = (details) =>
+  axios.post(`${url}/makePayment`, details);

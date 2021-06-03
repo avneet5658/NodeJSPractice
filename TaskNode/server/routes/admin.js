@@ -12,6 +12,10 @@ const {
   resetPassword,
   forgetLinkOtp,
   verifyOtp,
+  getUserById,
+  imageUploader,
+  upload,
+  paymentHandle,
 } = require("../controllers/controllers");
 const router = express.Router();
 
@@ -27,5 +31,7 @@ router.put("/forgetPassword", forgetPassword);
 router.put("/resetPassword", resetPassword);
 router.put("/otp", forgetLinkOtp);
 router.put("/verifyOtp", verifyOtp);
-
+router.get("/getUserById/:id", getUserById);
+router.post("/getImage", upload.single("image"), imageUploader);
+router.post("/makePayment", paymentHandle);
 module.exports = router;

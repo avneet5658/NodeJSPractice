@@ -8,10 +8,11 @@ const userSchema = mongoose.Schema({
     type: Boolean,
     default: true,
   },
-  contact:Number,
+  contact: Number,
   username: String,
   password: String,
-  otp:Number,
+  otp: Number,
+  image: String,
 });
 
 const User = mongoose.model("user", userSchema);

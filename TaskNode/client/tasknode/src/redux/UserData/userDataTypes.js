@@ -10,4 +10,6 @@ export const FORGET_PASSWORD = "FORGET_PASSWORD";
 export const RESET_PASSWORD = "RESET_PASSWORD";
 export const OTP = "OTP";
 export const OTP_VERIFY = "OTP_VERIFY";
-export const LOADING="LOADING";
+export const LOADING = "LOADING";
+export const FETCH_USER_BY_ID = "FETCH_USER_BY_ID";
+export const IMAGE_UPLOAD = "IMAGE_UPLOAD";
